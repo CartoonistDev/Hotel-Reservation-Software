@@ -3,6 +3,7 @@ package api;
 import model.Customer;
 import model.IRoom;
 import model.Reservation;
+import model.RoomClass;
 import service.CustomerService;
 import service.ReservationService;
 
@@ -10,8 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 
-import static service.ReservationService.findRooms;
-import static service.ReservationService.getCustomerReservation;
+import static service.ReservationService.findAvailableRooms;
 
 
 public class HotelResource {
@@ -28,16 +28,15 @@ public class HotelResource {
 
     //Static reference
     public static HotelResource hotelResource;
-    public static Collection<String> newReservation = new HashSet<>();
 
     //Calling Reservation and Customer services here
-    ReservationService reservationService = ReservationService.getInstance();
-    CustomerService customerService = CustomerService.getInstance();
+    public static final ReservationService reservationService = ReservationService.getInstance();
+    public static final CustomerService customerService = CustomerService.getInstance();
 
     public HotelResource(){}
 
     //Get a customer by email
-    public Customer getCustomer(String email){
+    public static Customer getCustomer(String email){
         return customerService.getCustomer(email);
     }
 
@@ -47,25 +46,25 @@ public class HotelResource {
         customerService.addCustomer(email, firstName, lastName);
     }
 
-    public IRoom getRoom(String roomNumber){
+    public static IRoom getRoom(String roomNumber){
         return reservationService.getARoom(roomNumber);
     }
 
-    public Reservation bookARoom(Customer customerEmail, IRoom room, Date checkInDate, Date checkOutDate){
-        return reservationService.reserveARoom(customerEmail, room, checkInDate, checkOutDate);
+    public static void bookARoom(Customer customerEmail, RoomClass room, Date checkInDate, Date checkOutDate){
+        reservationService.reserveARoom(customerEmail, checkInDate, checkOutDate,  room);
 
     }
 
     //Get all Reserved a room of a customer
 
-    public Collection<Reservation> getCustomersReservation(Customer customer){
-        return getCustomerReservation(customer);
+    public static void getCustomerReservations(Customer customer){
+        reservationService.getCustomerReservation(customer);
     }
 
-    //Find a room based on dates that are free
-
-    public Collection<IRoom> findARoom(Date checkIn, Date checkOut){
-        return findRooms(checkIn, checkOut);
+    public static void getReservations(){
+        reservationService.getAllReservations();
     }
+
+
 
 }

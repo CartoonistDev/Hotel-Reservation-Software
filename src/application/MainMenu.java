@@ -8,9 +8,7 @@ import model.RoomClass;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
 
 import static api.HotelResource.hotelResource;
 
@@ -36,13 +34,10 @@ public class MainMenu {
     public static void callTheFunction(int selectedInput, Scanner userInput, Scanner newSelectedValued, HotelResource hotelResource, AdminResource adminResource) {
         Customer customer = new Customer();
         if (selectedInput == 1){
-            findAndReserve(newSelectedValued, customer, adminResource, hotelResource, userInput);
+            findAndReserveRoom(adminResource);
+            //findAndReserve(newSelectedValued, customer, adminResource, hotelResource, userInput);
             runMenuAgain(newSelectedValued, userInput, hotelResource, adminResource);
         } else if(selectedInput == 2){
-            Collection<Customer> customerList2 = adminResource.getAllCustomers();
-            for (Customer customer1 : customerList2) {
-                printInfo(customer1.toString());
-            }
             runMenuAgain(newSelectedValued, userInput, hotelResource, adminResource);
         } else if (selectedInput == 3){
             createAnAccount(userInput, newSelectedValued, customer, hotelResource, adminResource);
@@ -77,9 +72,10 @@ public class MainMenu {
 
     private static void findAndReserve(Scanner newSelectedValued, Customer customer, AdminResource adminResource, HotelResource hotelResource, Scanner userInput){
         //Declaring variables
-        Date checkInDate;
-        Date checkOutDate;
+        Date checkInDate = null;
+        Date checkOutDate = null;
         String roomNumber = "";
+        Map<String, RoomClass> roomMap = new HashMap<>();
 
         try {
             Scanner inputDate = new Scanner(System.in);
@@ -99,28 +95,47 @@ public class MainMenu {
                 findAndReserve(newSelectedValued, customer, adminResource, hotelResource, userInput);
             } else if (selectCheckOutDate.trim().length() > 0){
                 checkOutDate = formatter.parse(selectCheckOutDate);
-                printInfo("CheckIn Date: " + checkOutDate);
-                AdminMenu.seeAllRooms(adminResource);
+                printInfo("CheckOut Date: " + checkOutDate);
+                List<RoomClass> availableRoomList = adminResource.avaliableRooms(checkInDate);
+                for (RoomClass room : availableRoomList){
+                    printInfo(room.toString());
+                    roomMap.put(room.getRoomNumber(), room);
+                }
             }
         } catch (ParseException e){
             printInfo("Please enter a valid date in this format mm/dd/yy example 01/15/2020");
             findAndReserve(newSelectedValued, customer, adminResource, hotelResource, userInput);
         }
-        bookNewRoom(userInput, newSelectedValued, customer, hotelResource, adminResource);
+        //bookNewRoom(userInput, newSelectedValued, customer, hotelResource, adminResource);
     }
 
     private static void createAnAccount(Scanner userInput, Scanner newSelectedValued, Customer customer, HotelResource hotelResource, AdminResource adminResource){
-        printInfo("Enter your email");
-        String email = userInput.next();
-        printInfo("Enter your first name");
-        String firstName = userInput.next();
-        printInfo("Enter your last name ");
-        String lastName = userInput.next();
-        hotelResource.createACustomer(email, firstName, lastName);
-        customer.setEmail(email);
-        customer.setFirstName(firstName);
-        customer.setLastName(lastName);
-        printInfo(email + " was created successfully");
+        try {
+            printInfo("Enter your email");
+            String email = userInput.next();
+            printInfo("Enter your first name");
+            String firstName = userInput.next();
+            if (firstName.isEmpty()) {
+                printInfo("First name cannot be empty.\n");
+                return;
+            }
+            printInfo("Enter your last name ");
+            String lastName = userInput.next();
+            if (lastName.isEmpty()) {
+                printInfo("Last name cannot be empty.\n");
+                return;
+            }
+
+            hotelResource.createACustomer(email, firstName, lastName);
+            customer.setEmail(email);
+            customer.setFirstName(firstName);
+            customer.setLastName(lastName);
+            printInfo(email + " was created successfully");
+        } catch (IllegalArgumentException e) {
+            printInfo("\"Email format not valid. Please use a valid email address");
+            createAnAccount(userInput, newSelectedValued, customer, hotelResource, adminResource);
+        }
+
     }
 
     private static void runMenuAgain(Scanner newSelectedValued, Scanner userInput, HotelResource hotelResource, AdminResource adminResource){
@@ -129,7 +144,16 @@ public class MainMenu {
         callTheFunction(newSelectedInput, userInput, newSelectedValued, hotelResource, adminResource);
     }
 
-    private static void bookNewRoom(Scanner newSelectedValued, Scanner userInput, Customer customer, HotelResource hotelResource, AdminResource adminResource){
+    private static void bookNewRoom(
+            Scanner newSelectedValued,
+            Scanner userInput,
+            Customer customer,
+            HotelResource hotelResource,
+            AdminResource adminResource,
+            HashMap<String, RoomClass> roomMap,
+            Date myCheckIn,
+            Date myCheckOut
+    ){
         //Declaring variables
         String bookRoom = "";
         printInfo("Would you like to book a Room? y/n");
@@ -140,19 +164,18 @@ public class MainMenu {
             if (accountHolder.equals("Y")){
                 printInfo("Enter your email");
                 String email = userInput.next();
-                if(email == customer.getEmail()){
+                if(email.equals(customer.getEmail())){
                     printInfo("What room would you like to book?");
                     printInfo("Please enter room number");
                     String roomNumber = userInput.next();
-                    for (IRoom room : roomNumber){
-
-                    }
+                    RoomClass selectRoom = roomMap.get(roomNumber);
+                    hotelResource.bookARoom(customer, selectRoom, myCheckIn, myCheckOut);
                 }
                 /////printInfo("-----------------------------------------------");
 
             } else if (accountHolder.equals("N")){
                 createAnAccount(userInput, newSelectedValued, customer, hotelResource, adminResource);
-                bookNewRoom(userInput, newSelectedValued, customer, hotelResource, adminResource);
+                bookNewRoom(userInput, newSelectedValued, customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckIn);
             }
 
         } else if (books.equals("N")){
@@ -161,4 +184,11 @@ public class MainMenu {
             printInfo("Please enter Y(Yes) or N(No)");
         }
     }
+
+    public static void findAndReserveRoom(AdminResource adminResource) {
+
+    }
+
+
+
 }

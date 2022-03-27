@@ -4,14 +4,21 @@ public class RoomClass implements IRoom {
     final String roomNumber;
     final Double roomPrice;
     final RoomType roomType;
+    private Reservation reservation;
 
     public RoomClass(String roomNumber, Double roomPrice, RoomType roomType){
-        super();
         this.roomNumber = roomNumber;
         this.roomPrice =  roomPrice;
         this.roomType = roomType;
     }
 
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
+    }
 
     @Override
     public String getRoomNumber(){
@@ -37,6 +44,7 @@ public class RoomClass implements IRoom {
     public String toString(){
         return "Room Number: " + roomNumber + '\n' +
                 "Room Type: " + roomType + '\n' +
+                "Reservation: " + reservation.toString() + '\n' +
                 "Room Price: " +  roomPrice;
     }
 }

@@ -33,10 +33,7 @@ public class AdminMenu {
             seeAllRooms(adminResource);
             runAdminAgain(userInput, hotelResource, adminResource);
         } else if (selectedValue == 3){
-            Collection<Reservation> reservedRooms = adminResource.displayAllReservations();
-            for (Reservation roomList: reservedRooms){
-                System.out.println(roomList.toString());
-            }
+            adminResource.displayAllReservations();
             runAdminAgain(userInput, hotelResource, adminResource);
         }
         else if (selectedValue == 4){

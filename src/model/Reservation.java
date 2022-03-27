@@ -7,14 +7,14 @@ public class Reservation {
     //Instantiates variables
 
     public Customer customer;
-    public IRoom room;
+    //public IRoom room;
     public Date checkInDate;
     public Date checkOutDate;
 
     //Constructors
-    public Reservation(Customer customer, IRoom room, Date checkInDate, Date checkOutDate){
+    public Reservation(Customer customer, Date checkInDate, Date checkOutDate){
         this.customer = customer;
-        this.room = room;
+       //this.room = room;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
     }
@@ -23,9 +23,9 @@ public class Reservation {
     public Customer getCustomer(){
         return customer;
     }
-    public IRoom getRoom(){
-        return room;
-    }
+    //public IRoom getRoom(){
+       // return room;
+    //}
     public Date getCheckInDate(){
         return checkInDate;
     }
@@ -35,9 +35,9 @@ public class Reservation {
 
     @Override
     public String toString(){
-        return "Customer's Name: " + customer + '\'' +
-                "Room Number: " + room + '\'' +
-                "Check in date: " + checkInDate + '\'' +
+        return "Customer's Name: " + customer + '\n' +
+               // "Room Number: " + room + '\n' +
+                "Check in date: " + checkInDate + '\n' +
                 "Check out date: " + checkOutDate;
     }
 

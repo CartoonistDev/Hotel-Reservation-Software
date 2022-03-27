@@ -51,6 +51,7 @@ public class Customer {
     public String getEmail(){
         return email;
     }
+    public String getFullName() { return firstName + " " + lastName;}
 
     @Override
     public String toString(){
