@@ -68,21 +68,30 @@ public class ReservationService {
         //Create an empty list
         List<RoomClass> freeRooms = new ArrayList<>();
 
-        //Iterate over roomList to get which rooms are reserved
-        for (RoomClass room : roomList){
-            if (room.getReservation() == null){
-                freeRooms.add(room);
-                continue;
-            }
+        try {
+            //Iterate over roomList to get which rooms are reserved
+            for (RoomClass room : roomList){
+                if (room.getReservation() == null){
+                    freeRooms.add(room);
+                    continue;
+                }
 
-            //Get an instant of the reserved room in the RoomClass
-            Reservation reservedRoom = room.getReservation();
+                //Get an instant of the reserved room in the RoomClass
+               // Reservation reservedRoom = room.getReservation();
 
-            if (roomIsAvailable(checkInDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
-                freeRooms.add(room);
+                //if (roomIsAvailable(checkInDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
+                   // freeRooms.add(room);
+              //  }
+                else {
+                    System.out.println("There is no room available at this time.");
+                }
             }
+            return freeRooms;
         }
-        return freeRooms;
+        catch (Exception e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        return null;
     }
 
     private static boolean roomIsAvailable(Date checkInDate, Date reservedCheckInDate, Date reservedCheckOutDate) {

@@ -91,7 +91,7 @@ public class MainMenu {
 
         try {
             Scanner inputDate = new Scanner(System.in);
-            SimpleDateFormat formatter = new SimpleDateFormat("mm/dd/yy");
+            SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
             printInfo("Enter CheckIn Date mm/dd/yy example 01/15/2020");
             String selectCheckInDate = inputDate.nextLine();
             if (selectCheckInDate.trim().length() > 0){
@@ -108,11 +108,17 @@ public class MainMenu {
             } else if (selectCheckOutDate.trim().length() > 0){
                 checkOutDate = formatter.parse(selectCheckOutDate);
                 printInfo("CheckOut Date: " + checkOutDate);
+
                 List<RoomClass> availableRoomList = adminResource.availableRooms(checkInDate);
                 for (RoomClass room : availableRoomList){
-                    printInfo(room.toString());
-                    roomMap.put(room.getRoomNumber(), room);
-                    bookNewRoom(newSelectedValued, userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+                    if (!availableRoomList.isEmpty()){
+                        printInfo(room.toString());
+                        roomMap.put(room.getRoomNumber(), room);
+                        bookNewRoom(newSelectedValued, userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+                    } else if (availableRoomList.isEmpty()){
+                        printInfo("No room found.");
+                        showMainMenu();
+                    }
                 }
             }
         } catch (ParseException e){
