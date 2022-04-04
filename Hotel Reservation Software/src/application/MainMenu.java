@@ -87,7 +87,7 @@ public class MainMenu {
                                        Date myCheckOut){
         //Declaring variables
         Date checkInDate = null;
-        Date checkOutDate;
+        Date checkOutDate = null;
 
         try {
             Scanner inputDate = new Scanner(System.in);
@@ -109,13 +109,13 @@ public class MainMenu {
                 checkOutDate = formatter.parse(selectCheckOutDate);
                 printInfo("CheckOut Date: " + checkOutDate);
 
-                List<RoomClass> availableRoomList = adminResource.availableRooms(checkInDate);
+                List<RoomClass> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
                 for (RoomClass room : availableRoomList){
                     if (!availableRoomList.isEmpty()){
                         printInfo(room.toString());
                         roomMap.put(room.getRoomNumber(), room);
                         bookNewRoom(newSelectedValued, userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
-                    } else if (availableRoomList.isEmpty()){
+                    } else {
                         printInfo("No room found.");
                         showMainMenu();
                     }

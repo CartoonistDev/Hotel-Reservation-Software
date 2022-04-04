@@ -63,7 +63,7 @@ public class ReservationService {
     }
 
 
-    public static List<RoomClass> findAvailableRooms(Date checkInDate) {
+    public static List<RoomClass> findAvailableRooms(Date checkInDate, Date checkOutDate) {
 
         //Create an empty list
         List<RoomClass> freeRooms = new ArrayList<>();
@@ -73,16 +73,16 @@ public class ReservationService {
             for (RoomClass room : roomList){
                 if (room.getReservation() == null){
                     freeRooms.add(room);
-                    continue;
                 }
 
                 //Get an instant of the reserved room in the RoomClass
-               // Reservation reservedRoom = room.getReservation();
+                Reservation reservedRoom = room.getReservation();
 
-                //if (roomIsAvailable(checkInDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
-                   // freeRooms.add(room);
-              //  }
+                if (roomIsAvailable(checkInDate, checkOutDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
+                   freeRooms.add(room);
+                }
                 else {
+                    freeRooms.remove(room);
                     System.out.println("There is no room available at this time.");
                 }
             }
@@ -94,8 +94,9 @@ public class ReservationService {
         return null;
     }
 
-    private static boolean roomIsAvailable(Date checkInDate, Date reservedCheckInDate, Date reservedCheckOutDate) {
-        return !(checkInDate.before(reservedCheckOutDate) && checkInDate.after(reservedCheckInDate));
+    private static boolean roomIsAvailable(Date checkInDate, Date checkOutDate, Date reservedCheckInDate, Date reservedCheckOutDate) {
+        return (checkInDate.before(reservedCheckInDate) && checkOutDate.before(reservedCheckInDate)
+                && (checkInDate.after(reservedCheckOutDate) && checkOutDate.after(reservedCheckOutDate)));
     }
 
 
@@ -115,7 +116,6 @@ public class ReservationService {
                 if (reservation.getCustomer().getEmail() == customer.email){
                     System.out.println(room);
                     return room;
-
                 }
             }
         }

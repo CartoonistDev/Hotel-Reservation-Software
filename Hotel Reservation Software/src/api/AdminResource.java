@@ -37,8 +37,8 @@ public class AdminResource {
         return null;
     }
 
-    public List<RoomClass> availableRooms(Date checkInDate){
-        return reservationService.findAvailableRooms(checkInDate);
+    public List<RoomClass> availableRooms(Date checkInDate, Date checkOutDate){
+        return reservationService.findAvailableRooms(checkInDate, checkOutDate);
     }
 
 }
