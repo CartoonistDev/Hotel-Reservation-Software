@@ -3,6 +3,7 @@ package application;
 import api.AdminResource;
 import api.HotelResource;
 import model.Customer;
+import model.IRoom;
 import model.RoomClass;
 
 import java.text.ParseException;
@@ -109,11 +110,11 @@ public class MainMenu {
                 checkOutDate = formatter.parse(selectCheckOutDate);
                 printInfo("CheckOut Date: " + checkOutDate);
 
-                List<RoomClass> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
-                for (RoomClass room : availableRoomList){
+                Collection<IRoom> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
+                for (IRoom room : availableRoomList){
                     if (!availableRoomList.isEmpty()){
                         printInfo(room.toString());
-                        roomMap.put(room.getRoomNumber(), room);
+                        roomMap.put(room.getRoomNumber(), (RoomClass) room);
                         bookNewRoom(newSelectedValued, userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
                     } else {
                         printInfo("No room found.");

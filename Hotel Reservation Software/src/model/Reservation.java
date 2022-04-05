@@ -2,19 +2,49 @@ package model;
 
 import java.util.Date;
 
-public class Reservation {
+public class Reservation implements IRoom {
 
     //Instantiates variables
 
     public Customer customer;
     public Date checkInDate;
     public Date checkOutDate;
+    public Reservation reservation;
 
     //Constructors
     public Reservation(Customer customer, Date checkInDate, Date checkOutDate){
         this.customer = customer;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
+        this.reservation = reservation;
+    }
+
+    @Override
+    public String getRoomNumber() {
+        return null;
+    }
+
+    @Override
+    public Double getRoomPrice() {
+        return null;
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+
+    @Override
+    public boolean isFree() {
+        return false;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
     }
 
     //Methods

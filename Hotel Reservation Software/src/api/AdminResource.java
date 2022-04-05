@@ -1,6 +1,7 @@
 package api;
 
 import model.Customer;
+import model.IRoom;
 import model.Reservation;
 import model.RoomClass;
 import service.CustomerService;
@@ -37,7 +38,7 @@ public class AdminResource {
         return null;
     }
 
-    public List<RoomClass> availableRooms(Date checkInDate, Date checkOutDate){
+    public Collection<IRoom> availableRooms(Date checkInDate, Date checkOutDate){
         return reservationService.findAvailableRooms(checkInDate, checkOutDate);
     }
 
