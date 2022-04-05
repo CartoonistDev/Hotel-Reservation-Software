@@ -2,7 +2,7 @@ package model;
 
 import java.util.Date;
 
-public class Reservation implements IRoom {
+public class Reservation{
 
     //Instantiates variables
 
@@ -19,25 +19,6 @@ public class Reservation implements IRoom {
         this.reservation = reservation;
     }
 
-    @Override
-    public String getRoomNumber() {
-        return null;
-    }
-
-    @Override
-    public Double getRoomPrice() {
-        return null;
-    }
-
-    @Override
-    public RoomType getRoomType() {
-        return null;
-    }
-
-    @Override
-    public boolean isFree() {
-        return false;
-    }
 
     public Reservation getReservation() {
         return reservation;
