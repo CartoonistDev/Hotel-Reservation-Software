@@ -1,10 +1,10 @@
 package model;
 
-public class FreeRoom extends RoomClass {
+/**public class FreeRoom extends RoomClass {
 
     //Exdend the RoomClass with its defined variable nto change the price
 
-    public FreeRoom(String roomNumber, Double price, RoomType roomType){
+    public FreeRoom(int roomNumber, Double price, RoomType roomType){
         super(roomNumber, 0.0, roomType);
     }
 
@@ -15,4 +15,4 @@ public class FreeRoom extends RoomClass {
                 "Room Price: " + 0.0;
     }
 
-}
+}*/

@@ -39,7 +39,7 @@ public class ReservationService {
     /**Create a Room having a room number and an ID
      * @param rooms
      */
-    public void addRoom(List<RoomClass> rooms){
+    public void addRooms(Collection<RoomClass> rooms){
         roomList.addAll(rooms);
         System.out.println("Room size = " + roomList.size());
     }
@@ -57,7 +57,7 @@ public class ReservationService {
     public void reserveARoom(Customer customer, Date checkInDate, Date checkOutDate, RoomClass room) {
         Reservation reservation = new Reservation(customer, checkInDate, checkOutDate);
         for (RoomClass thisRoom : roomList){
-            if (thisRoom.getRoomNumber().equals(room.getRoomNumber())){
+            if (thisRoom.getRoomNumber() == room.getRoomNumber()){
                 thisRoom.setReservation(reservation);
                 System.out.println("Room " + thisRoom.getRoomNumber() + " is Reserved!!!");
             }

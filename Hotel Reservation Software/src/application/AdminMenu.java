@@ -131,14 +131,15 @@ public class AdminMenu {
            //Convert a numeric String to an Integer
            String adminRoomNumber = String.valueOf(Integer.parseInt(userInput.next()));
 
-           List<RoomClass> allRooms = adminResource.getAllRooms();
+           Collection<RoomClass> allRooms = adminResource.getAllRooms();
            for (IRoom room: allRooms){
 
                //If new room number entered equals a previously picked number throw that
                if (room.getRoomNumber().equals(adminRoomNumber)){
-                   printInfo("This room has already been taken.");
-                   assignRoomNumber(userInput, adminResource);
+                   printInfo("This room already exist.");
+                   return null;
                }
+               assignRoomNumber(userInput, adminResource);
            }
            //Assign the new room number to roomNumber
            roomNumber = adminRoomNumber;
