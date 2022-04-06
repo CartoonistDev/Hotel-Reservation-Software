@@ -100,15 +100,23 @@ public class AdminMenu {
         //Run this functions
         roomPrice = createRoomPrice(userInput);
         roomNumber = assignRoomNumber(userInput, adminResource);
+        if (roomNumber == null){
+            printInfo("Choose a different room number");
+            AdminMenu.main(null);
+        } else {
+            //Create new room object
+            RoomClass room = new RoomClass(roomNumber, roomPrice, roomType);
+            newRooms.add(room);
+            printInfo("New room = " + newRooms.toString());
 
-        //Create new room object
-        RoomClass room = new RoomClass(roomNumber, roomPrice, roomType);
-        newRooms.add(room);
-        printInfo("New room = " + newRooms.toString());
+            //add created rooms to the resource
+            adminResource.addRoom(newRooms);
+            createNewRoom(userInput, adminResource, hotelResource);
+        }
 
-        //add created rooms to the resource
-        adminResource.addRoom(newRooms);
+    }
 
+    private static void createNewRoom(Scanner userInput, AdminResource adminResource, HotelResource hotelResource){
         printInfo("---------------------------------------");
         printInfo("Do you wish to add another room (Y/N)?");
         String continueFlag = userInput.next().toUpperCase();
@@ -119,7 +127,6 @@ public class AdminMenu {
         } else {
             printInfo("Please enter Y(Yes) or N(No)");
         }
-
     }
 
     private static String assignRoomNumber(Scanner userInput, AdminResource adminResource){
