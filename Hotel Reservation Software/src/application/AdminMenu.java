@@ -17,12 +17,12 @@ public class AdminMenu {
         //Get user input using the scanner object
 
         showAdminMenu();
-        Scanner userInput = new Scanner(System.in);
 
-        adminFunction(userInput, hotelResource, adminResource);
+        adminFunction(hotelResource, adminResource);
     }
 
-    public static void adminFunction(Scanner userInput, HotelResource hotelResource, AdminResource adminResource) {
+    public static void adminFunction(HotelResource hotelResource, AdminResource adminResource) {
+        Scanner userInput = new Scanner(System.in);
         try {
             int selectedValue = Integer.parseInt(userInput.next());
             if (selectedValue == 1) {
@@ -30,16 +30,16 @@ public class AdminMenu {
                 for (Customer customerList : customers) {
                     System.out.println(customerList.toString());
                 }
-                runAdminAgain(userInput, hotelResource, adminResource);
+                runAdminAgain(hotelResource, adminResource);
             } else if (selectedValue == 2) {
                 seeAllRooms(adminResource);
-                runAdminAgain(userInput, hotelResource, adminResource);
+                runAdminAgain(hotelResource, adminResource);
             } else if (selectedValue == 3) {
                 AdminResource.displayAllReservations();
-                runAdminAgain(userInput, hotelResource, adminResource);
+                runAdminAgain(hotelResource, adminResource);
             } else if (selectedValue == 4) {
-                createRoom(userInput, adminResource, hotelResource);
-                runAdminAgain(userInput, hotelResource, adminResource);
+                createRoom(adminResource, hotelResource);
+                runAdminAgain(hotelResource, adminResource);
             } else if (selectedValue == 5) {
                 //exit
                 MainMenu.main(null);
@@ -47,7 +47,7 @@ public class AdminMenu {
         } catch (NumberFormatException | InputMismatchException e) {
             printInfo("Error, enter a valid input");
             showAdminMenu();
-            adminFunction(userInput, hotelResource, adminResource);
+            adminFunction(hotelResource, adminResource);
         }
     }
 
@@ -67,8 +67,9 @@ public class AdminMenu {
         System.out.println(message);
     }
 
-    private static void createRoom(Scanner userInput, AdminResource adminResource, HotelResource hotelResource) {
+    private static void createRoom(AdminResource adminResource, HotelResource hotelResource) {
         List<IRoom> newRooms = new ArrayList<>();
+        Scanner userInput = new Scanner(System.in);
 
         //Declaring variables
         String roomNumber;
@@ -88,16 +89,16 @@ public class AdminMenu {
                 roomType = RoomType.DOUBLE;
             } else {
                 printInfo("Invalid input. Try 1 or 2.");
-                createRoom(userInput, adminResource, hotelResource);
+                createRoom(adminResource, hotelResource);
             }
         } catch (NumberFormatException e) {
             printInfo("Invalid input. Try 1 or 2.");
-            createRoom(userInput, adminResource, hotelResource);
+            createRoom(adminResource, hotelResource);
         }
 
         //Run this functions
-        roomPrice = createRoomPrice(userInput);
-        roomNumber = assignRoomNumber(userInput, adminResource, hotelResource);
+        roomPrice = createRoomPrice();
+        roomNumber = assignRoomNumber(adminResource, hotelResource);
 
         //Create new room object
         if (!roomNumber.equals("")) {
@@ -119,16 +120,17 @@ public class AdminMenu {
         printInfo("Do you wish to add another room (Y/N)?");
         String continueFlag = userInput.next().toUpperCase();
         if (continueFlag.equals("N")) {
-            runAdminAgain(userInput, hotelResource, adminResource);
+            runAdminAgain(hotelResource, adminResource);
         } else if (continueFlag.equals("Y")) {
-            createRoom(userInput, adminResource, hotelResource);
+            createRoom(adminResource, hotelResource);
         } else {
             printInfo("Please enter Y(Yes) or N(No)");
             createNewRoom(userInput, adminResource, hotelResource);
         }
     }
 
-    private static String assignRoomNumber(Scanner userInput, AdminResource adminResource, HotelResource hotelResource) {
+    private static String assignRoomNumber(AdminResource adminResource, HotelResource hotelResource) {
+        Scanner userInput = new Scanner(System.in);
         //Assign a value to roomNumber
         String roomNumber = "";
         try {
@@ -157,7 +159,8 @@ public class AdminMenu {
         return roomNumber;
     }
 
-    private static Double createRoomPrice(Scanner userInput) {
+    private static Double createRoomPrice() {
+        Scanner userInput = new Scanner(System.in);
         Double roomPrice = 0.0;
         try {
             printInfo("How much would this room cost. Values must be numbers greater than $0");
@@ -169,11 +172,11 @@ public class AdminMenu {
                 roomPrice = adminRoomPrice;
             } else {
                 printInfo("Enter a valid price. Values must be numbers greater than $0");
-                createRoomPrice(userInput);
+                createRoomPrice();
             }
         } catch (Exception e) {
             printInfo("Invalid price format. Please put in a number greater than 0");
-            createRoomPrice(userInput);
+            createRoomPrice();
         }
 
         return roomPrice;
@@ -186,9 +189,9 @@ public class AdminMenu {
         }
     }
 
-    private static void runAdminAgain(Scanner userInput, HotelResource hotelResource, AdminResource adminResource) {
+    private static void runAdminAgain(HotelResource hotelResource, AdminResource adminResource) {
         showAdminMenu();
-        adminFunction(userInput, hotelResource, adminResource);
+        adminFunction(hotelResource, adminResource);
     }
 
 }

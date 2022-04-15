@@ -64,12 +64,6 @@ public class CustomerService {
         return customers.get(customerEmail);
     }
 
-    //Return a boolean if customer is found
-
-    private static boolean isFind(String customerEmail) {
-        return customers.containsKey(customerEmail);
-    }
-
     //Display all customer data
 
     public Collection<Customer> getAllCustomers() {
