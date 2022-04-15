@@ -1,6 +1,7 @@
 package api;
 
 import model.*;
+
 import service.CustomerService;
 import service.ReservationService;
 
@@ -18,18 +19,11 @@ public class AdminResource {
         return customerService.getCustomer(email);
     }
 
-    public static void addRoom(Collection<RoomClass> rooms){
-        try {
-            for (RoomClass room : rooms){
-                reservationService.addRooms(Collections.singleton(room));
-            }
-        } catch (Exception e){
-            e.getLocalizedMessage();
-        }
-
+    public static void addRoom(List<IRoom> rooms){
+        reservationService.addRooms(rooms);
     }
 
-    public static List<RoomClass> getAllRooms(){
+    public static List<IRoom> getAllRooms(){
         return reservationService.getRooms();
     }
 

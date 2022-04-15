@@ -8,7 +8,7 @@ import java.util.*;
 
 public class AdminMenu {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         //Getting an instance of the hotelResources and adminResources class
         HotelResource hotelResource = new HotelResource();
@@ -25,29 +25,26 @@ public class AdminMenu {
     public static void adminFunction(Scanner userInput, HotelResource hotelResource, AdminResource adminResource) {
         try {
             int selectedValue = Integer.parseInt(userInput.next());
-            if (selectedValue == 1){
-                Collection<Customer> customers = adminResource.getAllCustomers();
-                for (Customer customerList: customers){
+            if (selectedValue == 1) {
+                Collection<Customer> customers = AdminResource.getAllCustomers();
+                for (Customer customerList : customers) {
                     System.out.println(customerList.toString());
                 }
                 runAdminAgain(userInput, hotelResource, adminResource);
-            }
-            else if (selectedValue == 2){
+            } else if (selectedValue == 2) {
                 seeAllRooms(adminResource);
                 runAdminAgain(userInput, hotelResource, adminResource);
-            } else if (selectedValue == 3){
-                adminResource.displayAllReservations();
+            } else if (selectedValue == 3) {
+                AdminResource.displayAllReservations();
                 runAdminAgain(userInput, hotelResource, adminResource);
-            }
-            else if (selectedValue == 4){
+            } else if (selectedValue == 4) {
                 createRoom(userInput, adminResource, hotelResource);
                 runAdminAgain(userInput, hotelResource, adminResource);
-            }
-            else if (selectedValue == 5){
+            } else if (selectedValue == 5) {
                 //exit
                 MainMenu.main(null);
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException | InputMismatchException e) {
             printInfo("Error, enter a valid input");
             showAdminMenu();
             adminFunction(userInput, hotelResource, adminResource);
@@ -71,52 +68,53 @@ public class AdminMenu {
     }
 
     private static void createRoom(Scanner userInput, AdminResource adminResource, HotelResource hotelResource) {
-        List<RoomClass> newRooms = new ArrayList<>();
+        List<IRoom> newRooms = new ArrayList<>();
 
         //Declaring variables
         String roomNumber;
         Double roomPrice;
         RoomType roomType = null;
+        Reservation reservation = null;
 
         printInfo("What type of Room would you like to create.");
         printInfo("Enter 1 for Single");
         printInfo("Enter 2 for Double");
-        try{
+        try {
             //Convert entered String value to an Integer
             int selectedRoomType = Integer.parseInt(userInput.next());
-            if (selectedRoomType == 1){
+            if (selectedRoomType == 1) {
                 roomType = RoomType.SINGLE;
-            } else if(selectedRoomType == 2){
+            } else if (selectedRoomType == 2) {
                 roomType = RoomType.DOUBLE;
             } else {
                 printInfo("Invalid input. Try 1 or 2.");
                 createRoom(userInput, adminResource, hotelResource);
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             printInfo("Invalid input. Try 1 or 2.");
             createRoom(userInput, adminResource, hotelResource);
         }
 
         //Run this functions
         roomPrice = createRoomPrice(userInput);
-        roomNumber = assignRoomNumber(userInput, adminResource);
-        if (roomNumber == null){
-            printInfo("Choose a different room number");
-            AdminMenu.main(null);
-        } else {
-            //Create new room object
-            RoomClass room = new RoomClass(roomNumber, roomPrice, roomType);
+        roomNumber = assignRoomNumber(userInput, adminResource, hotelResource);
+
+        //Create new room object
+        if (!roomNumber.equals("")) {
+
+            IRoom room = new RoomClass(roomNumber, roomPrice, roomType, reservation);
             newRooms.add(room);
-            printInfo("New room = " + newRooms.toString());
+            printInfo("A new room has been created\n" + newRooms);
 
             //add created rooms to the resource
-            adminResource.addRoom(newRooms);
-            createNewRoom(userInput, adminResource, hotelResource);
+            AdminResource.addRoom(newRooms);
         }
+
+        createNewRoom(userInput, adminResource, hotelResource);
 
     }
 
-    private static void createNewRoom(Scanner userInput, AdminResource adminResource, HotelResource hotelResource){
+    private static void createNewRoom(Scanner userInput, AdminResource adminResource, HotelResource hotelResource) {
         printInfo("---------------------------------------");
         printInfo("Do you wish to add another room (Y/N)?");
         String continueFlag = userInput.next().toUpperCase();
@@ -126,40 +124,40 @@ public class AdminMenu {
             createRoom(userInput, adminResource, hotelResource);
         } else {
             printInfo("Please enter Y(Yes) or N(No)");
+            createNewRoom(userInput, adminResource, hotelResource);
         }
     }
 
-    private static String assignRoomNumber(Scanner userInput, AdminResource adminResource){
+    private static String assignRoomNumber(Scanner userInput, AdminResource adminResource, HotelResource hotelResource) {
         //Assign a value to roomNumber
         String roomNumber = "";
-       try {
-           printInfo("Enter a Room Number");
+        try {
+            printInfo("Enter a Room Number");
 
-           //Convert a numeric String to an Integer
-           String adminRoomNumber = String.valueOf(Integer.parseInt(userInput.next()));
+            //Convert a numeric String to an Integer
+            String adminRoomNumber = String.valueOf(Integer.parseInt(userInput.next()));
 
-           Collection<RoomClass> allRooms = adminResource.getAllRooms();
-           for (IRoom room: allRooms){
+            Collection<IRoom> allRooms = AdminResource.getAllRooms();
+            for (IRoom room : allRooms) {
 
-               //If new room number entered equals a previously picked number throw that
-               if (room.getRoomNumber().equals(adminRoomNumber)){
-                   printInfo("This room already exist.");
-                   return null;
-               }
-               assignRoomNumber(userInput, adminResource);
-           }
-           //Assign the new room number to roomNumber
-           roomNumber = adminRoomNumber;
+                //If new room number entered equals a previously picked number throw that
+                if (room.getRoomNumber().equals(adminRoomNumber)) {
+                    printInfo("This room already exist.");
+                    return "";
+                }
+            }
+            //Assign the new room number to roomNumber
+            roomNumber = adminRoomNumber;
 
-           //If a different character that is not numeric is entered throw this NFE catch
-       } catch (NumberFormatException e){
-           printInfo("Invalid input. Only numbers greater than 0.");
-           assignRoomNumber(userInput, adminResource);
-       }
+            //If a different character that is not numeric is entered throw this NFE catch
+        } catch (NumberFormatException e) {
+            printInfo("Invalid input. Only numbers greater than 0.");
+            createNewRoom(userInput, adminResource, hotelResource);
+        }
         return roomNumber;
     }
 
-    private static Double createRoomPrice(Scanner userInput){
+    private static Double createRoomPrice(Scanner userInput) {
         Double roomPrice = 0.0;
         try {
             printInfo("How much would this room cost. Values must be numbers greater than $0");
@@ -167,28 +165,28 @@ public class AdminMenu {
             //Convert a numeric String to a Double
             Double adminRoomPrice = Double.parseDouble(userInput.next());
 
-            if(adminRoomPrice>0.0){
+            if (adminRoomPrice > 0.0) {
                 roomPrice = adminRoomPrice;
             } else {
                 printInfo("Enter a valid price. Values must be numbers greater than $0");
                 createRoomPrice(userInput);
             }
-        } catch (Exception e){
-           printInfo("Invalid price format. Please put in a number greater than 0");
+        } catch (Exception e) {
+            printInfo("Invalid price format. Please put in a number greater than 0");
             createRoomPrice(userInput);
         }
 
         return roomPrice;
     }
 
-    public static void seeAllRooms(AdminResource adminResource){
-        Collection<RoomClass> rooms =  adminResource.getAllRooms();
-        for (IRoom roomList: rooms){
+    public static void seeAllRooms(AdminResource adminResource) {
+        Collection<IRoom> rooms = AdminResource.getAllRooms();
+        for (IRoom roomList : rooms) {
             printInfo(roomList.toString());
         }
     }
 
-    private static void runAdminAgain(Scanner userInput, HotelResource hotelResource, AdminResource adminResource){
+    private static void runAdminAgain(Scanner userInput, HotelResource hotelResource, AdminResource adminResource) {
         showAdminMenu();
         adminFunction(userInput, hotelResource, adminResource);
     }

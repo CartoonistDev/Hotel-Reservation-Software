@@ -42,15 +42,15 @@ public class HotelResource {
     }
 
 
-    public static void bookARoom(Customer customerEmail, RoomClass room, Date checkInDate, Date checkOutDate){
+    public static void bookARoom(Customer customerEmail, Date checkInDate, Date checkOutDate, IRoom room){
         reservationService.reserveARoom(customerEmail, checkInDate, checkOutDate,  room);
 
     }
 
     //Get all Reserved a room of a customer
 
-    public static void getCustomerReservations(Customer customer){
-        reservationService.getCustomerReservation(customer);
+    public static void getCustomerReservations(String customerEmail){
+        reservationService.getCustomerReservation(customerEmail);
     }
 
     public static void getReservations(){

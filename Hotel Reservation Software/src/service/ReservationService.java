@@ -1,13 +1,11 @@
 package service;
 
-import model.IRoom;
 import model.Customer;
+import model.IRoom;
 import model.Reservation;
-import model.RoomClass;
+import model.IRoom;
 
 import java.util.*;
-import java.util.Date;
-import java.util.ArrayList;
 
 
 public class ReservationService {
@@ -15,12 +13,12 @@ public class ReservationService {
     /**
      * Implementing Singleton pattern so there is only on instance of the
      * ReservationService Class so that it can
-     *  be used for both customer and admin mode
+     * be used for both customer and admin mode
      */
 
     //Collection to store and retrieve Reservation
 
-    public static List<RoomClass> roomList = new ArrayList<>();
+    public static List<IRoom> roomList = new ArrayList<>();
     public static Map<String, IRoom> roomMap = new HashMap<>();
     public static List<Reservation> reservations = new ArrayList<>();
 
@@ -29,80 +27,53 @@ public class ReservationService {
 
     //Create new Customer Service
 
-    public static ReservationService getInstance(){
-        if(reservationService == null){
+    public static ReservationService getInstance() {
+        if (reservationService == null) {
             reservationService = new ReservationService();
         }
         return reservationService;
     }
 
-    /**Create a Room having a room number and an ID
-     * @param rooms
+    /**
+     * public static List<IRoom> findAvailableRooms(Date checkInDate, Date checkOutDate) {
+     * <p>
+     * //Create an empty list
+     * List<IRoom> freeRooms = new ArrayList<>();
+     * <p>
+     * try {
+     * //Iterate over roomList to get which rooms are reserved
+     * for (IRoom room : roomList){
+     * if (room.getReservation() == null){
+     * freeRooms.add(room);
+     * }
+     * <p>
+     * //Get an instant of the reserved room in the IRoom
+     * Reservation reservedRoom = room.getReservation();
+     * <p>
+     * if (roomIsAvailable(checkInDate, checkOutDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
+     * freeRooms.add(room);
+     * }
+     * else {
+     * freeRooms.remove(room);
+     * System.out.println("There is no room available at this time.");
+     * }
+     * }
+     * return freeRooms;
+     * }
+     * catch (Exception e){
+     * System.out.println(e.getLocalizedMessage());
+     * }
+     * return null;
+     * }
+     * <p>
+     * private static boolean roomIsAvailable(Date checkInDate, Date checkOutDate, Date reservedCheckInDate, Date reservedCheckOutDate) {
+     * return (checkInDate.before(reservedCheckInDate) && checkOutDate.before(reservedCheckInDate)
+     * && (checkInDate.after(reservedCheckOutDate) && checkOutDate.after(reservedCheckOutDate)));
+     * }
      */
-    public void addRooms(Collection<RoomClass> rooms){
-        roomList.addAll(rooms);
-        System.out.println("Room size = " + roomList.size());
-    }
-
-   /**public IRoom getARoom(String roomNumber){
-        for (IRoom room : roomList){
-            if (roomNumber.equals(room.getRoomNumber())){
-                return room;
-            }
-        }
-        System.out.println("Room not found. Please verify room  number and try again.");
-        return null;
-    }*/
-
-    public void reserveARoom(Customer customer, Date checkInDate, Date checkOutDate, RoomClass room) {
-        Reservation reservation = new Reservation(customer, checkInDate, checkOutDate);
-        for (RoomClass thisRoom : roomList){
-            if (thisRoom.getRoomNumber() == room.getRoomNumber()){
-                thisRoom.setReservation(reservation);
-                System.out.println("Room " + thisRoom.getRoomNumber() + " is Reserved!!!");
-            }
-        }
-    }
 
 
-    /**public static List<RoomClass> findAvailableRooms(Date checkInDate, Date checkOutDate) {
-
-        //Create an empty list
-        List<RoomClass> freeRooms = new ArrayList<>();
-
-        try {
-            //Iterate over roomList to get which rooms are reserved
-            for (RoomClass room : roomList){
-                if (room.getReservation() == null){
-                    freeRooms.add(room);
-                }
-
-                //Get an instant of the reserved room in the RoomClass
-                Reservation reservedRoom = room.getReservation();
-
-                if (roomIsAvailable(checkInDate, checkOutDate, reservedRoom.getCheckInDate(), reservedRoom.getCheckOutDate())){
-                   freeRooms.add(room);
-                }
-                else {
-                    freeRooms.remove(room);
-                    System.out.println("There is no room available at this time.");
-                }
-            }
-            return freeRooms;
-        }
-        catch (Exception e){
-            System.out.println(e.getLocalizedMessage());
-        }
-        return null;
-    }
-
-    private static boolean roomIsAvailable(Date checkInDate, Date checkOutDate, Date reservedCheckInDate, Date reservedCheckOutDate) {
-        return (checkInDate.before(reservedCheckInDate) && checkOutDate.before(reservedCheckInDate)
-                && (checkInDate.after(reservedCheckOutDate) && checkOutDate.after(reservedCheckOutDate)));
-    }*/
-
-
-    public static RoomClass getCustomerReservation(Customer customer) {
+    public static IRoom getCustomerReservation(String customerEmail) {
         /**
          * Loop through the roomList
          * check if a room reservation is not equal to null, get that reservation by
@@ -112,89 +83,115 @@ public class ReservationService {
          *
          * outside loop return null
          */
-        for (RoomClass room : roomList){
-            if (!room.getReservation().equals(null)){
+        for (IRoom room : roomList) {
+            if (room.isReserved()){
                 Reservation reservation = room.getReservation();
-                if (reservation.getCustomer().getEmail() == customer.email){
-                    System.out.println(room);
+                if (reservation.getCustomer().getEmail().equals(customerEmail)) {
+                    printInfo(room);
                     return room;
                 }
             }
         }
+        printInfo("No reservation found");
         return null;
     }
 
-
-    public static List<RoomClass> getAllReservations() {
+    public static List<IRoom> getAllReservations() {
         /**
-         * Create an empty list of the RoomClass type called reservedRoomList
+         * Create an empty list of the IRoom type called reservedRoomList
          * Loop through the roomList
          * check if a room reservation is not equal to null, add that room to the reservedRoomList
          * return reservedRoomList
          *
          **/
 
-        List<RoomClass> allReservation = new ArrayList<>();
-        for (RoomClass room : roomList){
-            if (room.getReservation() != null){
+        List<IRoom> allReservation = new ArrayList<>();
+        for (IRoom room : roomList) {
+            if (room.getReservation() != null) {
                 allReservation.add(room);
             }
         }
         return allReservation;
     }
 
-    public List<RoomClass> getRooms() {
-        return roomList;
-    }
-
-
-
     public static void printAllReservations() {
-        if (getAllReservations().isEmpty()){
+        if (getAllReservations().isEmpty()) {
             System.out.println("There is no reservation at this time");
-        }
-        else {
+        } else {
             System.out.println("'\n'*****Available Reservations*****");
             System.out.println(getAllReservations());
         }
 
     }
 
+    /**
+     * Create a Room having a room number and an ID
+     *
+     * @param rooms
+     */
+    public void addRooms(Collection<IRoom> rooms) {
+        roomList.addAll(rooms);
+        System.out.println("Room size = " + roomList.size());
+    }
+
+    /**
+     * public IRoom getARoom(String roomNumber){
+     * for (IRoom room : roomList){
+     * if (roomNumber.equals(room.getRoomNumber())){
+     * return room;
+     * }
+     * }
+     * System.out.println("Room not found. Please verify room  number and try again.");
+     * return null;
+     * }
+     */
+
+    public void reserveARoom(Customer customer, Date checkInDate, Date checkOutDate, IRoom room) {
+        Reservation reservation = new Reservation(customer, checkInDate, checkOutDate);
+        printInfo("reservation == "+reservation);
+        try {
+            for (IRoom thisRoom : roomList) {
+                if (thisRoom.getRoomNumber().equals(room.getRoomNumber())) {
+                    thisRoom.setReservation(reservation);
+                    //roomList.remove(thisRoom);
+                    printInfo("thisRoom == "+thisRoom);
+                    System.out.println("Room " + thisRoom.getRoomNumber() + " is Reserved!!!");
+                }
+            }
+        } catch (ConcurrentModificationException e) {
+            e.getLocalizedMessage();
+        }
+    }
+
+    private static void printInfo(Object message){
+        System.out.println(message.toString());
+    }
+
+    public List<IRoom> getRooms() {
+        return roomList;
+    }
 
     public Collection<IRoom> findAvailableRooms(Date checkInDate, Date checkOutDate) {
         Collection<IRoom> availableRooms = new ArrayList<>(); //store rooms that are available, i.e. not reserved
-        for (IRoom room : roomList){
-            if (!isRoomReserved(room, checkInDate, checkOutDate)){
+        for (IRoom room : roomList) {
+            if (!isRoomReserved(room, checkInDate, checkOutDate)) {
                 availableRooms.add(room);
-            } else if (isRoomReserved(room, checkInDate, checkOutDate)){
-                System.out.println("There is no room available at this time.");
-            }
-            else {
-                availableRooms.remove(room);
-                System.out.println("There is no room available at this time.");
             }
         }
         return availableRooms;
     }
 
-    private boolean isRoomReserved(IRoom room, Date checkInDate, Date checkOutDate){
-        if (reservations == null) return false; //if no reservation has been made, then all rooms are free
-        else {
-            for (Reservation reservation : reservations) {
-                Reservation reservedRoom = reservation.getReservation();
-                if (reservedRoom.getReservation().equals(room.getRoomNumber())) {
-                    System.out.println("Room is reserved..checking if room will be free by date...");
-                    // if the room has been reserved but the new date is not within the reserved room's date, then it is free.
-                    if (isDateWithinRange(checkInDate, checkOutDate, reservation)) {
-                        return true;
-                    }
-                }
+    private boolean isRoomReserved(IRoom room, Date checkInDate, Date checkOutDate) {
+        if (room.isReserved()) {
+            Reservation reservedRoom = room.getReservation();
+            if (isDateWithinRange(checkInDate, checkOutDate, reservedRoom)) {
+                return true;
             }
         }
-
         return false;
     }
-    public boolean isDateWithinRange (Date checkInDate, Date checkOutDate, Reservation reservation) {
+
+    public boolean isDateWithinRange(Date checkInDate, Date checkOutDate, Reservation reservation) {
         return !(checkOutDate.before(reservation.getCheckInDate()) || checkInDate.after(reservation.getCheckOutDate()));
     }
 

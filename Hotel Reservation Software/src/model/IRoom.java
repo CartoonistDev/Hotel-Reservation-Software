@@ -5,10 +5,12 @@ public interface IRoom {
 
     //Declaring the methods
 
-    public String getRoomNumber();
-    public Double getRoomPrice();
-    public RoomType getRoomType();
-    public boolean isFree();
-    public Reservation getReservation();
-
+    String getRoomNumber();
+    void setRoomNumber(String roomNumber);
+    Double getRoomPrice();
+    RoomType getRoomType();
+    boolean isFree();
+    void setReservation(Reservation reservation);
+    Reservation getReservation();
+    boolean isReserved();
 }

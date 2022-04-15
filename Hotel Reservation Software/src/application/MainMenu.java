@@ -5,6 +5,7 @@ import api.HotelResource;
 import model.Customer;
 import model.IRoom;
 import model.RoomClass;
+import model.RoomType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,7 +13,7 @@ import java.util.*;
 
 public class MainMenu {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         //Get user input using the scanner object
 
@@ -20,47 +21,44 @@ public class MainMenu {
         //Getting an instance of the hotelResources class
         HotelResource hotelResource = new HotelResource();
         AdminResource adminResource = new AdminResource();
-        Date myCheckIn = null;
-        Date myCheckOut = null;
-        HashMap<String, RoomClass> roomMap = new HashMap<>();
+        HashMap<String, IRoom> roomMap = new HashMap<>();
 
         showMainMenu();
         Scanner userInput = new Scanner(System.in);
 
-        callTheFunction(userInput,  hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
+        callTheFunction(userInput, hotelResource, adminResource, roomMap);
     }
 
-    public static void callTheFunction(Scanner userInput,
-                                       HotelResource hotelResource,
-                                       AdminResource adminResource,
-                                       HashMap<String, RoomClass> roomMap,
-                                       Date myCheckIn,
-                                       Date myCheckOut) {
+    public static void callTheFunction(Scanner userInput, HotelResource hotelResource, AdminResource adminResource, HashMap<String, IRoom> roomMap) {
         try {
-           //String selectedInput = userInput.next();
+            //String selectedInput = userInput.next();
             int selectedInput = Integer.parseInt(userInput.next());
             Customer customer = new Customer();
-            if (selectedInput == 1){
+            //createDefaultRoom();
+            createDefaultCustomer();
+
+            if (selectedInput == 1) {
                 //findAndReserveRoom(adminResource);
-                findAndReserve(customer, adminResource, hotelResource, userInput, roomMap, myCheckIn, myCheckOut);
-                runMenuAgain(userInput, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
-            } else if(selectedInput == 2){
-                HotelResource.getCustomerReservations(customer);
-                runMenuAgain( userInput, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
-            } else if (selectedInput == 3){
+                findAndReserve(customer, adminResource, hotelResource, userInput, roomMap);
+                runMenuAgain(userInput, hotelResource, adminResource, roomMap);
+            } else if (selectedInput == 2) {
+                //TODO: take user input and pass to the below function
+                HotelResource.getCustomerReservations("user1@gmail.com");
+                runMenuAgain(userInput, hotelResource, adminResource, roomMap);
+            } else if (selectedInput == 3) {
                 createAnAccount(userInput, customer, hotelResource);
-                runMenuAgain( userInput, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
-            } else if(selectedInput == 4){
+                runMenuAgain(userInput, hotelResource, adminResource, roomMap);
+            } else if (selectedInput == 4) {
                 AdminMenu.main(null);
-            } else if(selectedInput == 5){
+            } else if (selectedInput == 5) {
                 printInfo("BYE");
             }
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException | InputMismatchException e) {
             printInfo("Error, enter a valid input");
             showMainMenu();
-            callTheFunction(userInput,  hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
+            callTheFunction(userInput, hotelResource, adminResource, roomMap);
         }
-     }
+    }
 
     private static void showMainMenu() {
         printInfo("---------------------------------------");
@@ -78,23 +76,22 @@ public class MainMenu {
         System.out.println(message);
     }
 
-    private static void findAndReserve(Customer customer,
-                                       AdminResource adminResource,
-                                       HotelResource hotelResource,
-                                       Scanner userInput,
-                                       HashMap<String, RoomClass> roomMap,
-                                       Date myCheckIn,
-                                       Date myCheckOut){
+    private static void findAndReserve(
+            Customer customer, 
+            AdminResource adminResource, 
+            HotelResource hotelResource, 
+            Scanner userInput, HashMap<String, 
+            IRoom> roomMap) {
         //Declaring variables
         Date checkInDate = null;
-        Date checkOutDate = null;
+        Date checkOutDate;
 
         try {
             Scanner inputDate = new Scanner(System.in);
             SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
             printInfo("Enter CheckIn Date mm/dd/yy example 01/15/2020");
             String selectCheckInDate = inputDate.nextLine();
-            if (selectCheckInDate.trim().length() > 0){
+            if (selectCheckInDate.trim().length() > 0) {
                 checkInDate = formatter.parse(selectCheckInDate);
                 printInfo("CheckIn Date: " + checkInDate);
             }
@@ -102,36 +99,32 @@ public class MainMenu {
             String selectCheckOutDate = inputDate.nextLine();
 
             //Throw this error if CheckOut Date entered comes before CheckIn Date entered
-            if (selectCheckOutDate.compareTo(selectCheckInDate) == -1){
+            if (selectCheckOutDate.compareTo(selectCheckInDate) == -1) {
                 printInfo("Please enter a valid date that comes after CheckIn Date");
-                findAndReserve(customer, adminResource, hotelResource, userInput, roomMap, myCheckIn, myCheckOut);
-            } else if (selectCheckOutDate.trim().length() > 0){
+                findAndReserve(customer, adminResource, hotelResource, userInput, roomMap);
+            } else if (selectCheckOutDate.trim().length() > 0) {
                 checkOutDate = formatter.parse(selectCheckOutDate);
                 printInfo("CheckOut Date: " + checkOutDate);
 
                 Collection<IRoom> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
-                for (IRoom room : availableRoomList){
-                    if (availableRoomList.isEmpty()) {
-                        printInfo("No room is available at this time. Please try again later.");
-                        showMainMenu();
-                    } else if (!availableRoomList.isEmpty()){
-                        printInfo(room.toString());
-                        roomMap.putIfAbsent(room.getRoomNumber(), (RoomClass) room);
-                        bookNewRoom(userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+                if (availableRoomList.isEmpty()) {
+                    printInfo("No room is available at this time. Please try again later.");
+                } else {
+                    printInfo(availableRoomList.toString());
+                    for (IRoom room: availableRoomList){
+                        roomMap.put(room.getRoomNumber(), room);
                     }
+                    bookNewRoom(userInput, customer, hotelResource, adminResource, roomMap,  checkInDate, checkOutDate);
                 }
             }
-        } catch (ParseException e){
+        } catch (ParseException e) {
             printInfo("Please enter a valid date in this format mm/dd/yy example 01/15/2020");
-            findAndReserve(customer, adminResource, hotelResource, userInput, roomMap, myCheckIn, myCheckOut);
+            findAndReserve(customer, adminResource, hotelResource, userInput, roomMap);
         }
         //bookNewRoom(userInput, newSelectedValued, customer, hotelResource, adminResource);
     }
 
-    private static void createAnAccount(Scanner userInput,
-                                        Customer customer,
-                                        HotelResource hotelResource
-                                      ){
+    private static void createAnAccount(Scanner userInput, Customer customer, HotelResource hotelResource) {
         List<Customer> newCustomer = new ArrayList<>();
         try {
             printInfo("Enter your email");
@@ -169,82 +162,82 @@ public class MainMenu {
 
     }
 
-    private static void runMenuAgain(Scanner userInput,
-                                     HotelResource hotelResource,
-                                     AdminResource adminResource,
-                                     HashMap<String, RoomClass> roomMap,
-                                     Date myCheckIn,
-                                     Date myCheckOut){
+    private static void runMenuAgain(Scanner userInput, HotelResource hotelResource, AdminResource adminResource, HashMap<String, IRoom> roomMap) {
         showMainMenu();
-        int newSelectedInput =  userInput.nextInt();
-        callTheFunction(userInput, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
+        int newSelectedInput = userInput.nextInt();
+        callTheFunction(userInput, hotelResource, adminResource, roomMap);
     }
 
-    private static void bookNewRoom(
-            Scanner userInput,
-            Customer customer,
-            HotelResource hotelResource,
-            AdminResource adminResource,
-            HashMap<String, RoomClass> roomMap,
-            Date myCheckIn,
-            Date myCheckOut
-    ){
+    private static void bookNewRoom(Scanner userInput, Customer customer, HotelResource hotelResource, AdminResource adminResource, HashMap<String, IRoom> roomMap, Date myCheckIn, Date myCheckOut) {
         printInfo("Would you like to book a Room? y/n");
         String books = userInput.next().toUpperCase();
-        if (books.equals("Y")){
+        if (books.equals("Y")) {
             printInfo("Do you have an account with us? y/n");
             String accountHolder = userInput.next().toUpperCase();
-            if (accountHolder.equals("Y")){
-                accountHolder(userInput, customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
+            if (accountHolder.equals("Y")) {
+                accountHolder(userInput, customer, hotelResource, roomMap,  myCheckIn, myCheckOut);
 
-            } else if (accountHolder.equals("N")){
+            } else if (accountHolder.equals("N")) {
                 createNewAccount(userInput, customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
-                bookNewRoom(userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+                bookNewRoom(userInput, customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
             }
 
-        } else if (books.equals("N")){
-            runMenuAgain(userInput, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+        } else if (books.equals("N")) {
+            runMenuAgain(userInput, hotelResource, adminResource, roomMap);
         } else {
             printInfo("Please enter Y(Yes) or N(No)");
         }
     }
 
-    private static void accountHolder(Scanner userInput,
-                                       Customer customer,
-                                       HotelResource hotelResource,
-                                       AdminResource adminResource,
-                                       HashMap<String, RoomClass> roomMap,
-                                       Date myCheckIn,
-                                       Date myCheckOut){
+    private static void availableRoomCheck() {
+        //IRoom available = userInput.next();
+//        availableROomCheck(roomNmber, roomList){
+//            for room in roomList{
+//                if room.roomNumber.equals(roomNumber) {return room;}
+//            }
+//        }
+    }
+
+    private static void accountHolder(Scanner userInput, Customer customer, HotelResource hotelResource, HashMap<String, IRoom> roomMap, Date myCheckIn, Date myCheckOut) {
         printInfo("Enter your email");
         String email = userInput.next();
-        if(adminResource.getCustomers(email) == null){
+        customer = AdminResource.getCustomers(email);
+        if (customer == null) {
             printInfo("Customer not found");
             printInfo("Please create an account");
             createAnAccount(userInput, customer, hotelResource);
-        }
-        else {
+        } else {
             printInfo("What room would you like to book?");
             printInfo("Please enter room number");
             String roomNumber = userInput.next();
-            RoomClass selectRoom = roomMap.get(roomNumber);
-            hotelResource.bookARoom(customer, selectRoom, myCheckIn, myCheckOut);
+            printInfo("You have selected room " + roomNumber);
+          
+            IRoom selectRoom = roomMap.get(roomNumber);
+            if (selectRoom != null){
+                HotelResource.bookARoom(customer, myCheckIn, myCheckOut, selectRoom);
+            }else {
+                printInfo("please enter a valid room number");
+                accountHolder(userInput,customer, hotelResource, roomMap,  myCheckIn, myCheckOut);
+            }
         }
-
     }
 
-    private static void createNewAccount(
-            Scanner userInput,
-            Customer customer,
-            HotelResource hotelResource,
-            AdminResource adminResource,
-            HashMap<String, RoomClass> roomMap,
-            Date myCheckIn,
-            Date myCheckOut
-    ){
+    private static void createNewAccount(Scanner userInput, Customer customer, HotelResource hotelResource, AdminResource adminResource, HashMap<String, IRoom> roomMap,  Date myCheckIn, Date myCheckOut) {
         createAnAccount(userInput, customer, hotelResource);
-        bookNewRoom(userInput, customer, hotelResource, adminResource,roomMap, myCheckIn, myCheckOut);
+        bookNewRoom(userInput, customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
     }
 
+    private static void createDefaultCustomer() {
+        for (int x = 0; x < 3; x++) {
+            new HotelResource().addNewCustomer("user" + (x + 1) + "@gmail.com", "user" + (x + 1), "user" + (x + 1));
+        }
+    }
+
+    private static void createDefaultRoom() {
+        for (int x = 0; x < 3; x++) {
+            IRoom room = new RoomClass(x + 1 + "", 10.0 * (x + 1), RoomType.SINGLE, null);
+            AdminResource.addRoom(List.of(room));
+        }
+    }
 
 }
