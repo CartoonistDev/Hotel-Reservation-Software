@@ -110,6 +110,7 @@ public class MainMenu {
                 Collection<IRoom> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
                 if (availableRoomList.isEmpty()) {
                     printInfo("No room is available at this time. Please try again later.");
+                    findAndReserve(customer, adminResource, hotelResource, roomMap);
                 } else {
                     printInfo(availableRoomList.toString());
                     for (IRoom room: availableRoomList){

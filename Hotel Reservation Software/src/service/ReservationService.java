@@ -43,7 +43,7 @@ public class ReservationService {
          * outside loop return null
          */
         for (IRoom room : roomList) {
-            if (room.isReserved()){
+            if (room.isReserved()) {
                 Reservation reservation = room.getReservation();
                 if (reservation.getCustomer().getEmail().equals(customerEmail)) {
                     printInfo(room);
@@ -83,6 +83,10 @@ public class ReservationService {
 
     }
 
+    private static void printInfo(Object message) {
+        System.out.println(message.toString());
+    }
+
     /**
      * Create a Room having a room number and an ID
      */
@@ -91,13 +95,15 @@ public class ReservationService {
         System.out.println("Room size = " + roomList.size());
     }
 
-
     public void reserveARoom(Customer customer, Date checkInDate, Date checkOutDate, IRoom room) {
         Reservation reservation = new Reservation(customer, checkInDate, checkOutDate);
-        printInfo("Customer details : "+reservation);
         try {
             for (IRoom thisRoom : roomList) {
                 if (thisRoom.getRoomNumber().equals(room.getRoomNumber())) {
+                    if (thisRoom.isReserved()) {
+                        printInfo("sorry this room is not available, try again");
+                        break;
+                    }
                     thisRoom.setReservation(reservation);
                     System.out.println("Room " + thisRoom.getRoomNumber() + " is Reserved!!!");
                 }
@@ -105,10 +111,6 @@ public class ReservationService {
         } catch (ConcurrentModificationException e) {
             e.getLocalizedMessage();
         }
-    }
-
-    private static void printInfo(Object message){
-        System.out.println(message.toString());
     }
 
     public List<IRoom> getRooms() {
@@ -122,15 +124,42 @@ public class ReservationService {
                 availableRooms.add(room);
             }
         }
+        if (availableRooms.isEmpty()) {
+            Date newCheckInDate = newDate(checkOutDate, 1);
+            Date newCheckOutDate = newDate(checkOutDate, 7);
+
+            printInfo("old check in = " + checkInDate);
+            printInfo("new check in = " + newCheckInDate);
+            printInfo("old check out = " + checkOutDate);
+            printInfo("new check out = " + newCheckOutDate);
+
+            for (IRoom room : roomList) {
+                if (!isRoomReserved(room, newCheckInDate, newCheckOutDate)) {
+                    availableRooms.add(room);
+                }
+            }
+            if (availableRooms.size() > 0) {
+                printInfo("we could not find a room within " + checkInDate + " and " + checkOutDate + " but the following dates are available. " +
+                        newCheckInDate + " to " + newCheckOutDate);
+            } else {
+                printInfo(("we could not find a room within " + checkInDate + " and " + checkOutDate));
+            }
+        }
         return availableRooms;
+    }
+
+    //Suggest new date
+    private static Date newDate(Date checkOutDate, int numberOfDays){
+        Calendar c = Calendar.getInstance();
+        c.setTime(checkOutDate); // Using today's date
+        c.add(Calendar.DATE, numberOfDays); // Adding 5 days
+        return c.getTime();
     }
 
     private boolean isRoomReserved(IRoom room, Date checkInDate, Date checkOutDate) {
         if (room.isReserved()) {
             Reservation reservedRoom = room.getReservation();
-            if (isDateWithinRange(checkInDate, checkOutDate, reservedRoom)) {
-                return true;
-            }
+            return isDateWithinRange(checkInDate, checkOutDate, reservedRoom);
         }
         return false;
     }
