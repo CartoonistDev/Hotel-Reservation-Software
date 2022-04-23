@@ -25,24 +25,32 @@ public class AdminMenu {
         Scanner userInput = new Scanner(System.in);
         try {
             int selectedValue = Integer.parseInt(userInput.next());
-            if (selectedValue == 1) {
-                Collection<Customer> customers = AdminResource.getAllCustomers();
-                for (Customer customerList : customers) {
-                    System.out.println(customerList.toString());
-                }
-                runAdminAgain(hotelResource, adminResource);
-            } else if (selectedValue == 2) {
-                seeAllRooms(adminResource);
-                runAdminAgain(hotelResource, adminResource);
-            } else if (selectedValue == 3) {
-                AdminResource.displayAllReservations();
-                runAdminAgain(hotelResource, adminResource);
-            } else if (selectedValue == 4) {
-                createRoom(adminResource, hotelResource);
-                runAdminAgain(hotelResource, adminResource);
-            } else if (selectedValue == 5) {
-                //exit
-                MainMenu.main(null);
+            switch (selectedValue) {
+                case 1:
+                    Collection<Customer> customers = adminResource.getAllCustomers();
+                    for (Customer customerList : customers) {
+                        System.out.println(customerList.toString());
+                    }
+                    runAdminAgain(hotelResource, adminResource);
+                    break;
+
+                case 2:
+                    seeAllRooms(adminResource);
+                    runAdminAgain(hotelResource, adminResource);
+                    break;
+                case 3:
+                    adminResource.displayAllReservations();
+                    runAdminAgain(hotelResource, adminResource);
+                    break;
+                case 4:
+                    createRoom(adminResource, hotelResource);
+                    runAdminAgain(hotelResource, adminResource);
+                    break;
+                case 5:
+                    MainMenu.main(null);
+                default:
+                    printInfo("Please enter a valid input 1 - 5.");
+                    runAdminAgain(hotelResource, adminResource);
             }
         } catch (NumberFormatException | InputMismatchException e) {
             printInfo("Error, enter a valid input");

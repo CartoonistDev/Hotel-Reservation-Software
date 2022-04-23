@@ -54,15 +54,23 @@ public class CustomerService {
      */
 
 
-    public void addCustomer(String email, String firstName, String lastName){
-        customers.put(email, new Customer(firstName, lastName, email));
+    public void addCustomer( String firstName, String lastName, String email){
+        Customer newCustomer = new Customer(firstName, lastName, email);
+        customers.put(newCustomer.getEmail(), newCustomer);
+
     }
+
+
 
     //retrieve customer from map by email => key
 
-    public Customer getCustomer(String customerEmail){
-        return customers.get(customerEmail);
+    public static Customer getCustomer(String email){
+        if(!customers.containsKey(email))
+            return null;
+        else
+            return customers.get(email);
     }
+
 
     //Display all customer data
 

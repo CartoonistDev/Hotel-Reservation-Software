@@ -35,24 +35,35 @@ public class MainMenu {
             int selectedInput = Integer.parseInt(userInput.next());
             Customer customer = new Customer();
             //createDefaultRoom();
-            //createDefaultCustomer(); // Create dummy users
+           // createDefaultCustomer(); // Create dummy users
 
-            if (selectedInput == 1) {
-                findAndReserve(customer, adminResource, hotelResource, roomMap);
-                runMenuAgain(hotelResource, adminResource, roomMap);
-            } else if (selectedInput == 2) {
-                //TODO: take user input and pass to the below function
-                seeCustomerReservation(userInput, customer);
-               // HotelResource.getCustomerReservations("user1@gmail.com");
-                runMenuAgain(hotelResource, adminResource, roomMap);
-            } else if (selectedInput == 3) {
-                createAnAccount(hotelResource);
-                runMenuAgain(hotelResource, adminResource, roomMap);
-            } else if (selectedInput == 4) {
-                AdminMenu.main(null);
-            } else if (selectedInput == 5) {
-                printInfo("BYE");
+            switch (selectedInput){
+                case 1 :
+                    findAndReserve(customer, adminResource, hotelResource, roomMap);
+                    runMenuAgain(hotelResource, adminResource, roomMap);
+                    break;
+                case  2 :
+                    //TODO: take user input and pass to the below function
+                    seeCustomerReservation(userInput, customer);
+                    // HotelResource.getCustomerReservations("user1@gmail.com");
+                    runMenuAgain(hotelResource, adminResource, roomMap);
+                    break;
+                case  3 :
+                    createAnAccount(hotelResource);
+                    runMenuAgain(hotelResource, adminResource, roomMap);
+                    break;
+                case 4 :
+                    AdminMenu.main(null);
+                    break;
+                case 5 :
+                    printInfo("BYE");
+                    break;
+                default:
+                    printInfo("Please enter a valid input 1 - 5.");
+                    runMenuAgain(hotelResource, adminResource, roomMap);
             }
+
+
         } catch (NumberFormatException | InputMismatchException e) {
             printInfo("Error, enter a valid input");
             showMainMenu();
@@ -109,8 +120,22 @@ public class MainMenu {
 
                 Collection<IRoom> availableRoomList = adminResource.availableRooms(checkInDate, checkOutDate);
                 if (availableRoomList.isEmpty()) {
-                    printInfo("No room is available at this time. Please try again later.");
-                    findAndReserve(customer, adminResource, hotelResource, roomMap);
+                    Collection<IRoom> alternativeRooms = hotelResource.alternativeRooms(checkInDate, checkOutDate);
+
+                    if (alternativeRooms.size() > 0) {
+                        final Date alternativeCheckIn = hotelResource.newDate(checkInDate);
+                        final Date alternativeCheckOut = hotelResource.newDate(checkOutDate);
+                        System.out.println("We've only found rooms on alternative dates:" +
+                                "\nCheck-In Date:" + alternativeCheckIn +
+                                "\nCheck-Out Date:" + alternativeCheckOut);
+
+                        printInfo(alternativeRooms.toString());
+                        bookNewRoom(customer, hotelResource, adminResource, roomMap, alternativeCheckIn, alternativeCheckOut);
+
+
+                    } else {
+                        System.out.println("No rooms found.");
+                        }
                 } else {
                     printInfo(availableRoomList.toString());
                     for (IRoom room: availableRoomList){
@@ -130,8 +155,6 @@ public class MainMenu {
         List<Customer> newCustomer = new ArrayList<>();
         Customer customer = new Customer();
         try {
-            printInfo("Enter your email");
-            String email = userInput.next();
             printInfo("Enter your first name");
             String firstName = userInput.next();
             if (firstName.isEmpty()) {
@@ -144,12 +167,15 @@ public class MainMenu {
                 printInfo("Last name cannot be empty.\n");
                 return;
             }
+            printInfo("Enter your email");
+            String email = userInput.next();
 
-            hotelResource.createACustomer(email, firstName, lastName);
+            hotelResource.createACustomer(firstName, lastName, email);
             customer.setEmail(email);
             customer.setFirstName(firstName);
             customer.setLastName(lastName);
-            printInfo(email + " was created successfully");
+            printInfo("Your account with this email : " +email+" was created successfully");
+            printInfo("You can now book a new room.");
         } catch (IllegalArgumentException e) {
             printInfo("\nEmail format not valid. Please use a valid email address");
             createAnAccount(hotelResource);
@@ -160,7 +186,7 @@ public class MainMenu {
         newCustomer.add(newCustomers);
 
         //Add created customers to resource
-        hotelResource.addNewCustomer(customer.email, customer.firstName, customer.lastName);
+        hotelResource.createACustomer(customer.firstName, customer.lastName, customer.email);
 
 
     }
@@ -183,7 +209,7 @@ public class MainMenu {
             printInfo("Do you have an account with us? y/n");
             String accountHolder = userInput.next().toUpperCase();
             if (accountHolder.equals("Y")) {
-                accountHolder(customer, hotelResource, roomMap,  myCheckIn, myCheckOut);
+                accountHolder(customer, hotelResource, roomMap,  myCheckIn, myCheckOut, adminResource);
 
             } else if (accountHolder.equals("N")) {
                 createNewAccount(customer, hotelResource, adminResource, roomMap, myCheckIn, myCheckOut);
@@ -202,7 +228,9 @@ public class MainMenu {
                                       HotelResource hotelResource,
                                       HashMap<String, IRoom> roomMap,
                                       Date myCheckIn,
-                                      Date myCheckOut) {
+                                      Date myCheckOut,
+                                      AdminResource adminResource
+                                      ) {
         Scanner userInput = new Scanner(System.in);
         printInfo("Enter your email");
         String email = userInput.next();
@@ -210,19 +238,21 @@ public class MainMenu {
         if (customer == null) {
             printInfo("Customer not found");
             printInfo("Please create an account");
-            createAnAccount(hotelResource);
+            runMenuAgain(hotelResource, adminResource, roomMap);
         } else {
             printInfo("What room would you like to book?");
             printInfo("Please enter room number");
             String roomNumber = userInput.next();
             printInfo("You have selected room " + roomNumber);
-          
+
+
             IRoom selectRoom = roomMap.get(roomNumber);
             if (selectRoom != null){
                 HotelResource.bookARoom(customer, myCheckIn, myCheckOut, selectRoom);
             }else {
-                printInfo("please enter a valid room number");
-                accountHolder(customer, hotelResource, roomMap,  myCheckIn, myCheckOut);
+                printInfo("This room does not exist.");
+                printInfo("No room is available at this time. Please try again later");
+                runMenuAgain(hotelResource, adminResource, roomMap);
             }
         }
     }
@@ -251,7 +281,7 @@ public class MainMenu {
 
     private static void createDefaultCustomer() {
         for (int x = 0; x < 3; x++) {
-            new HotelResource().addNewCustomer("user" + (x + 1) + "@gmail.com", "user" + (x + 1), "user" + (x + 1));
+            new HotelResource().createACustomer("user" + (x + 1) + "@gmail.com", "user" + (x + 1), "user" + (x + 1));
         }
     }
 
